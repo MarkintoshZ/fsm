@@ -304,6 +304,19 @@ function makeCanvasHiPPI(canvas) {
 }
 
 window.onload = function() {
+  let directedCheckBox = document.getElementById('directed');
+  let gridSnapCheckBox = document.getElementById('gridsnap');
+
+  directedCheckBox.checked = localStorage.getItem("directed") !== 'false';
+  gridSnapCheckBox.checked = localStorage.getItem("gridsnap") !== 'false';
+
+  directedCheckBox.onclick = function() {
+    localStorage.setItem("directed", directedCheckBox.checked);
+  };
+
+  gridSnapCheckBox.onclick = function() {
+    localStorage.setItem("gridsnap", gridSnapCheckBox.checked);
+  }
 
 	document.getElementById("clearCanvas").onclick = 
 	function(){
