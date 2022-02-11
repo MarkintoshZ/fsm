@@ -278,6 +278,31 @@ function snapNode(node) {
 	}
 }
 
+// Returns: 1 on 'normal' screens, 2 on retina displays
+var PIXEL_RATIO = (function () {
+    var ctx = document.createElement("canvas").getContext("2d"),
+        dpr = window.devicePixelRatio || 1,
+        bsr = ctx.webkitBackingStorePixelRatio ||
+              ctx.mozBackingStorePixelRatio ||
+              ctx.msBackingStorePixelRatio ||
+              ctx.oBackingStorePixelRatio ||
+              ctx.backingStorePixelRatio || 1;
+
+    return dpr / bsr;
+})();
+
+
+function makeCanvasHiPPI(canvas) {
+  canvas.style.width  = canvas.width  + "px";
+  canvas.style.height = canvas.height + "px";
+
+  canvas.width  *= PIXEL_RATIO;
+  canvas.height *= PIXEL_RATIO;
+
+  var context = canvas.getContext('2d');
+  context.scale(PIXEL_RATIO, PIXEL_RATIO)
+}
+
 window.onload = function() {
 
 	document.getElementById("clearCanvas").onclick = 
@@ -308,6 +333,7 @@ window.onload = function() {
 	updateMode();
 
 	canvas = document.getElementById('canvas');
+  makeCanvasHiPPI(canvas);
 	restoreBackup();
 	draw();
 
@@ -449,13 +475,15 @@ var shift = false;
 
 document.onkeydown = function(e) {
 	var key = crossBrowserKey(e);
+  var shiftKeyDown = e.shiftKey;
 
 	if(key == 16) {
 		shift = true;
-	} else if(!canvasHasFocus()) {
+  } 
+  if(!canvasHasFocus()) {
 		// don't read keystrokes when other things have focus
 		return true;
-	} else if(key == 8) { // backspace key
+	} else if(key == 8 && !shiftKeyDown) { // delete
 		if(selectedObject != null && 'text' in selectedObject) {
 			selectedObject.text = selectedObject.text.substr(0, selectedObject.text.length - 1);
 			resetCaret();
@@ -464,7 +492,7 @@ document.onkeydown = function(e) {
 
 		// backspace is a shortcut for the back button, but do NOT want to change pages
 		return false;
-	} else if(key == 46) { // delete key
+	} else if(key == 8 && shiftKeyDown) { // shift + delete
 		if(selectedObject != null) {
 			for(var i = 0; i < nodes.length; i++) {
 				if(nodes[i] == selectedObject) {
